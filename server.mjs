@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {resolve,extname,sep} from 'node:path';
 import {randomBytes} from 'node:crypto';
-import {nextChapter,CHARACTERS,WORLD,createGame,tick,rewind,interact,echoAt} from './dist/engine.mjs';
+import {buildAction,nextChapter,CHARACTERS,WORLD,createGame,tick,rewind,interact,echoAt} from './dist/engine.mjs';
 const root=resolve(fileURLToPath(new URL('./dist/',import.meta.url))),rooms=new Map();
 const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
 const fail=(message,status=400)=>{throw Object.assign(new Error(message),{status});};
@@ -24,6 +24,7 @@ const server=http.createServer(async(req,res)=>{try{const url=new URL(req.url,'h
   else if(type==='start'){if(room.game.host!==id)fail('The host starts the loop.',403);if(room.game.started)fail('The loop already started.');room.game.started=true;}
   else if(type==='rewind'){if(room.game.host!==id)fail('Ask the host to rewind.',403);rewind(room.game);room.inputs={};}
   else if(type==='next-chapter'){if(room.game.host!==id)fail('The host starts the next chapter.',403);if(!nextChapter(room.game))fail('Complete this chapter first.');room.inputs={};broadcast(room);}
+  else if(type==='build'){buildAction(room.game,id,data.action,data.cell,data.type);broadcast(room);}
   else if(type==='interact')interact(room.game,id);
   else if(type==='leave'){room.game.players=room.game.players.filter(p=>p.id!==id);room.keys.delete(key);delete room.inputs[id];if(room.game.host===id)room.game.host=room.game.players[0]?.id;}
   else fail('Unknown action.');return json(res,200,{ok:true});}
