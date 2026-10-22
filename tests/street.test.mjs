@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {makeStreetCamera,projectStreet,pickStreet} from '../dist/street3d.mjs';
+test('perspective ground projection and click picking agree across zoom levels',()=>{for(const aspect of [.6,1.6,2.4])for(const zoom of [1.1,2.35,3.4]){const cam=makeStreetCamera({x:5,y:9},{aspect,zoom});for(const point of [{x:5,y:9,z:0},{x:3,y:6,z:0},{x:8,y:8,z:0}]){const screen=projectStreet(point,cam),picked=pickStreet(screen.x,screen.y,cam);assert.ok(picked);assert.ok(Math.abs(picked.x-point.x)<1e-8);assert.ok(Math.abs(picked.y-point.y)<1e-8);}}});
+test('screen-direction movement matches the existing isometric controls',()=>{const cam=makeStreetCamera({x:5,y:9}),centre=projectStreet({x:5,y:9,z:0},cam),right=projectStreet({x:6,y:8,z:0},cam),forward=projectStreet({x:4,y:8,z:0},cam);assert.ok(right.x>centre.x);assert.ok(forward.y<centre.y);assert.equal(pickStreet(600,-10000,cam),null);});

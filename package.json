@@ -1,0 +1,14 @@
+{
+  "name": "echo-last-tram",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/game.mjs && node --check dist/street3d.mjs && node --check dist/render.mjs && node --check dist/effects.mjs && node --check dist/themes.mjs && node --check dist/camera.mjs && node --check dist/engine.mjs && node --check server.mjs && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
