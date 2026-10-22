@@ -31,7 +31,7 @@ jobs:
             if curl -fsS http://localhost:3001/api/health >/dev/null; then break; fi
             sleep 0.2
           done
-          google-chrome --headless --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage --virtual-time-budget=6000 --dump-dom http://localhost:3001/ >/tmp/echo-dom.html 2>/tmp/echo-chrome.log
+          timeout 90s google-chrome --headless --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage --virtual-time-budget=1500 --dump-dom http://localhost:3001/ >/tmp/echo-dom.html 2>/tmp/echo-chrome.log
           node --input-type=module -e "import {readFileSync} from 'node:fs'; const html=readFileSync('/tmp/echo-dom.html','utf8'); if(!html.includes('data-game-ready=\"true\"')) { console.error(html.slice(-6000)); process.exit(1); } console.log('Browser rendered first game frame successfully');"
       - name: Prepare the same entry point for both Pages publishing modes
         run: |

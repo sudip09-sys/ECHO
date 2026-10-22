@@ -21,14 +21,14 @@ export const CITY_ART=[
 ];
 export function createImmersiveRenderer(canvas){
  const gl=canvas.getContext('webgl',{antialias:false,alpha:false,preserveDrawingBuffer:true});
- if(!gl)return createStreetRenderer(canvas);
+ if(!gl)return createStreetRenderer(canvas);canvas.width=960;canvas.height=608;
  const shader=(kind,src)=>{const s=gl.createShader(kind);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;};
  const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,`
  attribute vec3 aPos,aNormal,aColor;attribute float aAlpha;
  uniform vec3 uEye,uForward,uRight,uUp,uFog;uniform vec2 uLens;
  varying vec4 vColor;varying vec3 vWorld;varying vec3 vNormal;
  void main(){vWorld=aPos;vNormal=aNormal;vec3 delta=aPos-uEye;float depth=dot(delta,uForward);vec3 sun=normalize(vec3(-.5,-.4,1.));float lighting=.52+.48*max(0.,dot(aNormal,sun));vec3 color=aColor*lighting;float fog=1.-exp(-length(delta)*.022);vColor=vec4(mix(color,uFog,fog),aAlpha);gl_Position=vec4(dot(delta,uRight)*uLens.x,dot(delta,uUp)*uLens.y,1.001334*depth-.2001334,depth);}
- `));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec4 vColor;varying vec3 vWorld;varying vec3 vNormal;void main(){vec3 tile=floor(vWorld*12.);float grain=fract(sin(dot(tile,vec3(12.9898,78.233,37.719)))*43758.5453);vec3 edge=fract(vWorld+vec3(.001));float seam=1.;if(abs(vNormal.z)>.5){if(edge.x<.022||edge.y<.022)seam=.84;}else if(edge.z<.025)seam=.86;gl_FragColor=vec4(vColor.rgb*(.9+grain*.18)*seam,vColor.a);}'));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));gl.useProgram(program);
+ `));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec4 vColor;varying vec3 vWorld;varying vec3 vNormal;void main(){vec3 tile=floor(vWorld*12.);float grain=fract(dot(tile,vec3(.1031,.11369,.13787)));grain=fract(grain*(grain+19.19));vec3 edge=fract(vWorld+vec3(.001));float seam=1.;if(abs(vNormal.z)>.5){if(edge.x<.022||edge.y<.022)seam=.84;}else if(edge.z<.025)seam=.86;gl_FragColor=vec4(vColor.rgb*(.9+grain*.18)*seam,vColor.a);}'));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));gl.useProgram(program);
  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);for(const [name,size,offset]of [['aPos',3,0],['aNormal',3,12],['aColor',3,24],['aAlpha',1,36]]){const a=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,size,gl.FLOAT,false,40,offset);}
  const uniforms=Object.fromEntries(['uEye','uForward','uRight','uUp','uFog','uLens'].map(n=>[n,gl.getUniformLocation(program,n)]));
  gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
